@@ -1,0 +1,220 @@
+#!/bin/bash
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+ST="\033[0m"
+
+function updateTelegrafConfig {
+# expected directory of telegarf configuration as first param (/etc/telegraf)
+# backup current config 
+sudo cp $1/telegraf.conf $1/$(date +"%F-%H:%M:%S")-telegraf.conf.orig
+sudo rm -rf $1/telegraf.conf
+sudo echo "# Global Agent Configuration
+[agent]
+  hostname = \"${moniker}\" # set this to a name you want to identify your node in the grafana dashboard
+  flush_interval = \"15s\"
+  interval = \"15s\"
+# Input Plugins
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = false
+[[inputs.disk]]
+  ignore_fs = [\"devtmpfs\", \"devfs\"]
+[[inputs.io]]
+[[inputs.mem]]
+[[inputs.net]]
+[[inputs.system]]
+[[inputs.swap]]
+[[inputs.netstat]]
+[[inputs.processes]]
+[[inputs.kernel]]
+[[inputs.diskio]]
+# Output Plugin InfluxDB
+[[outputs.influxdb]]
+  database = \"umeemetricsdb\"
+  urls = [ \"${mon_serv_url}\" ] # keep this to send all your metrics to the community dashboard otherwise use http://yourownmonitoringnode:8086
+  username = \"${mon_serv_username}\" # keep both values if you use the community dashboard
+  password = \"${mon_serv_passwd}\"
+[[inputs.exec]]
+  commands = [\"sudo su -c ${mon_umee_path} -s /bin/bash ${user}\"] # change home and username to the useraccount your validator runs at
+  interval = \"10s\"
+  timeout = \"5s\"
+  data_format = \"influx\"
+  data_type = \"integer\""> $1/telegraf.conf #$HOME/telegraf.conf
+#restart service
+sudo systemctl restart telegraf
+}
+
+function installTelegraf {
+# install telegraf
+if [ -n  "$(ps -A | grep telegraf)" ]
+then
+echo "Telegaraf installed already"
+else 
+echo "Begin to install telegraf"
+sudo apt update
+sudo apt -y install curl jq bc
+
+# install telegraf
+sudo cat <<EOF | sudo tee /etc/apt/sources.list.d/influxdata.list
+deb https://repos.influxdata.com/ubuntu bionic stable
+EOF
+sudo curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+
+sudo apt update
+sudo apt -y install telegraf
+
+sudo systemctl enable --now telegraf
+sudo systemctl is-enabled telegraf
+systemctl status telegraf
+
+# make the telegraf user sudo and adm to be able to execute scripts as sol user
+sudo adduser telegraf sudo
+sudo adduser telegraf adm
+sudo -- bash -c 'echo "telegraf ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers'
+fi 
+}
+
+function showNode75Logo {
+echo -e "$GREEN _   _           _     ______ _____ 
+| \ | |         | |   |____  | ____|
+|  \| | ___   __| | ___   / /| |__  
+| . \` |/ _ \ / _\` |/ _ \ / / |___ \ 
+| |\  | (_) | (_| |  __// /   ___) |
+|_| \_|\___/ \__,_|\___/_/   |____/ $ST"
+}
+
+showNode75Logo
+sleep 1s
+user=$(whoami)
+echo -e "\nThis script will install UMEE monitoring tools on your server for user $GREEN${user}$ST"
+echo -e "Continue? (y/n)"
+until [ -n  "$item" ]
+do
+read item
+case "$item" in
+    y|Y) echo "Start installing"
+        ;;
+    n|N) echo "Exit"
+        exit 0
+        ;;
+    *) echo "Please type answer (y/n)"
+        item=""
+esac
+done
+
+echo -e "Install Telegarf agent:"
+# sudo apt update
+# sudo apt install curl jq -y
+installTelegraf
+
+sleep 1s
+path_to_config="$HOME/.umee/config/config.toml"
+echo -e "\nTry to get UMEE node info from $path_to_config"
+COS_PORT_RPC=$(cat $path_to_config | grep -oE 'laddr[[:space:]]*=[[:space:]]*"tcp://127\.0\.0\.1:[0-9]+\"' | grep -oP '(?<="tcp://127.0.0.1:)(\d+)(?=")')
+sleep 1s
+
+until [ -n "$COS_PORT_RPC" ]
+do 
+    echo -e "Can't parse configuration file $REDpath_to_config$ST"
+    echo -e "Type correct path to umee configuration file (../config/config.toml) or press Ctrl+C for exit:"
+    read path_to_config
+    COS_PORT_RPC=$(cat $path_to_config | grep -oE 'laddr[[:space:]]*=[[:space:]]*"tcp://127\.0\.0\.1:[0-9]+\"' | grep -oP '(?<="tcp://127.0.0.1:)(\d+)(?=")')    
+done
+echo -e "Successfully parse UMEE configuration file."
+
+cd $HOME
+COS_BIN_NAME=$(which umeed)
+# echo "$user"
+# echo "$umeed_path"
+
+echo -e "Try get data from node"
+status=$(curl -s localhost:$COS_PORT_RPC/status)
+
+if [ -z "$status" ]
+then
+    echo -e "${RED}Can't get response from RPC port: $COS_PORT_RPC $ST"
+    echo -e "Exit"
+    exit -1
+fi
+
+echo "Success!"
+moniker=$(jq -r '.result.node_info.moniker' <<<$status)
+val_key=$(jq -r '.result.validator_info.pub_key.value' <<<$status)
+val_info=$(${COS_BIN_NAME} q staking validators -o json --limit=3000 --node "tcp://localhost:${COS_PORT_RPC}" \
+| jq -r  --arg val_key "$val_key" '.validators[] | select(.consensus_pubkey.key==$val_key)')
+COS_VALOPER=$(jq -r '.operator_address' <<<$val_info)
+
+echo -e "Node RPC port: $GREEN$COS_PORT_RPC$ST"
+echo -e "Node moniker: $GREEN$moniker$ST"
+echo -e "Node operator address: $GREEN$COS_VALOPER$ST"
+
+repo="$HOME/mon_umee"
+echo -e "\nClone monitoring project repo to: ${repo}"
+if ! [ -d $repo ]
+then
+  echo "Clone repository"
+  git clone https://github.com/shurinov/mon_umee.git
+else
+  echo "Repository exist. Stash local changes and pull"
+  cd $repo
+  git stash
+  git pull $repo
+  cd $HOME
+fi
+
+echo -e "Create $repo/var.sh with node settings"
+echo "
+#UMEE monitoring variables for node $moniker
+COS_BIN_NAME=${COS_BIN_NAME}
+COS_PORT_RPC=${COS_PORT_RPC}
+COS_VALOPER=${COS_VALOPER}
+"> $repo/mon_var.sh
+chmod +x $repo/mon_var.sh
+chmod +x $repo/monitor.sh
+
+
+item=""
+until [ -n  "$item" ]
+do
+echo -e "Insert Monitoring service URL (example: http://123.45.67.89:8086):"
+read mon_serv_url
+echo -e "Do you confirm using ${mon_serv_url} as service URL? (y/n)"
+read item
+case "$item" in
+    y|Y);;
+    *) item=""
+esac
+done
+
+item=""
+until [ -n  "$item" ]
+do
+echo -e "Insert Monitoring service username (example: metrics):"
+read mon_serv_username
+echo -e "Do you confirm using ${mon_serv_username} as service username? (y/n)"
+read item
+case "$item" in
+    y|Y);;
+    *) item=""
+esac
+done
+
+item=""
+until [ -n  "$item" ]
+do
+echo -e "Insert Monitoring service password (example: password):"
+read mon_serv_passwd
+echo -e "Do you confirm using ${mon_serv_passwd} as service password? (y/n)"
+read item
+case "$item" in
+    y|Y);;
+    *) item=""
+esac
+done
+
+mon_umee_path="${repo}/monitor.sh"
+updateTelegrafConfig /etc/telegraf
+echo -e "UMEE monitoring tools was successfully install/upgrade. You could check telegraf logs: \"sudo journalctl -u telegraf -f\""
+echo -e "Project github: https://github.com/shurinov/mon_umee.git"
