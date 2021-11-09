@@ -67,13 +67,33 @@ sudo apt -y install telegraf
 
 sudo systemctl enable --now telegraf
 sudo systemctl is-enabled telegraf
-systemctl status telegraf
+# systemctl status telegraf
 
 # make the telegraf user sudo and adm to be able to execute scripts as sol user
 sudo adduser telegraf sudo
 sudo adduser telegraf adm
 sudo -- bash -c 'echo "telegraf ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers'
 fi 
+}
+
+function seachRPC {
+while read str
+do
+if [ -n "$(echo $str | grep -oE "^[[[:alnum:]]+]")" ]
+then 
+    header=$(echo $str | grep -oE "^[[[:alnum:]]+]")
+fi
+if [ "$header" == "[rpc]" ]
+then
+    port=$(echo $str | grep -oE 'laddr[[:space:]]*=[[:space:]]*"tcp://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+\"' | grep -oP '(?<=:)(\d+)(?=")' )
+    if [ -n "$port" ]
+    then
+        break
+    fi
+fi
+done < "$1"
+echo $port
+return $(( $port ))
 }
 
 function showNode75Logo {
@@ -112,7 +132,7 @@ installTelegraf
 sleep 1s
 path_to_config="$HOME/.umee/config/config.toml"
 echo -e "\nTry to get UMEE node info from $path_to_config"
-COS_PORT_RPC=$(cat $path_to_config | grep -oE 'laddr[[:space:]]*=[[:space:]]*"tcp://127\.0\.0\.1:[0-9]+\"' | grep -oP '(?<="tcp://127.0.0.1:)(\d+)(?=")')
+COS_PORT_RPC=$( seachRPC $path_to_config )
 sleep 1s
 
 until [ -n "$COS_PORT_RPC" ]
@@ -120,7 +140,7 @@ do
     echo -e "Can't parse configuration file $REDpath_to_config$ST"
     echo -e "Type correct path to umee configuration file (../config/config.toml) or press Ctrl+C for exit:"
     read path_to_config
-    COS_PORT_RPC=$(cat $path_to_config | grep -oE 'laddr[[:space:]]*=[[:space:]]*"tcp://127\.0\.0\.1:[0-9]+\"' | grep -oP '(?<="tcp://127.0.0.1:)(\d+)(?=")')    
+    COS_PORT_RPC=$( seachRPC $path_to_config )
 done
 echo -e "Successfully parse UMEE configuration file."
 
