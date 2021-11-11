@@ -33,12 +33,12 @@ sudo echo "# Global Agent Configuration
 # Output Plugin InfluxDB
 [[outputs.influxdb]]
   database = \"umeemetricsdb\"
-  urls = [ \"${mon_serv_url}\" ] # keep this to send all your metrics to the community dashboard otherwise use http://yourownmonitoringnode:8086
-  username = \"${mon_serv_username}\" # keep both values if you use the community dashboard
-  password = \"${mon_serv_passwd}\"
+  urls = [ \"${mon_serv_url}\" ] # example http://yourownmonitoringnode:8086
+  username = \"${mon_serv_username}\" # your database username
+  password = \"${mon_serv_passwd}\" # your database user's password
 [[inputs.exec]]
   commands = [\"sudo su -c ${mon_umee_path} -s /bin/bash ${user}\"] # change home and username to the useraccount your validator runs at
-  interval = \"10s\"
+  interval = \"15s\"
   timeout = \"5s\"
   data_format = \"influx\"
   data_type = \"integer\""> $1/telegraf.conf #$HOME/telegraf.conf
@@ -69,7 +69,7 @@ sudo systemctl enable --now telegraf
 sudo systemctl is-enabled telegraf
 # systemctl status telegraf
 
-# make the telegraf user sudo and adm to be able to execute scripts as sol user
+# make the telegraf user sudo and adm to be able to execute scripts as umee user
 sudo adduser telegraf sudo
 sudo adduser telegraf adm
 sudo -- bash -c 'echo "telegraf ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers'
