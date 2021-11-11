@@ -1,13 +1,24 @@
 # Umee node monitoring tool
 
 This project is developed for the UMEE community. The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring).
-The default architecture requires, in addition to the server, a node with a [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) agent, an additional monitoring server for [InfluxDB](https://www.influxdata.com/products/influxdb/) database and [Grafana](https://grafana.com/) web interface.
 
-You should configure your [UMEE node](https://docs.umee.cc/umee/) before you start installation monitoring suite. There is fast monitoring installation script in this repo.
+To monitor you node you should have installed and configured:
+On node server:
+* [UMEE node](https://docs.umee.cc/umee/) which should be configured (correct moniker, validator key, network ports setup)
+* [Telegraf agent](https://www.influxdata.com/time-series-platform/telegraf/)
+* **mon_umee** scripts set
 
-## Monitoring server installation 
+On monitoring server:
+* [InfluxDB](https://www.influxdata.com/products/influxdb/)
+* [Grafana](https://grafana.com/)
 
-### InfluxDB 
+It is possible to install the software on the node server instance. But it is better to move it to standalone instance with opened web access to watch it from browser at any location.
+
+## The following steps will guide you through the setup process:
+
+### Monitoring server installation 
+
+#### InfluxDB 
 
 Install:
 ```
@@ -24,7 +35,7 @@ sudo systemctl start influxdb
 sudo systemctl status influxdb
 ```
 
-Setup database (replace the password with a more secure one):
+Setup database (replacing the passwords in the example with your own more secure ones):
 ```
 influx
 > create database umeemetricsdb
@@ -34,13 +45,13 @@ influx
 > grant READ on umeemetricsdb to grafana
 ```
 
-You shold prepare for node agent installation:
-* monitoring server ip 
-* monitoring database username
-* monitoring database user password
+You should keep database user and password to use later for agent configuration, please write it.
 
-### Grafana
+In the case of using standalone instance for monitoring staff,  you should know your node external ip address (you can know it by command ```curl ifconfig.me```).
+In the case of installation on the same instance, just use **localhost** or **127.0.0.1**
 
+#### Grafana
+Install:
 ```
 wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
 sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
@@ -56,24 +67,31 @@ sudo systemctl start grafana-server
 # verify the status of the Grafana service with the following command:
 sudo systemctl status grafana-server
 ```
-Follow to **YOUR_MONITORING_SERVER_IP:3000** for setup grafana dashboard
+Configuration:
+
+Follow to **YOUR_MONITORING_SERVER_IP:3000** for setup grafana dashboard.
+The following steps are performed in the graphical interface of grafana.
 
 Change default password for grafana user admin/admin to more safe
 
-Add data source InfluxDB with settings
-HTTP
-**URL : http://localhost:8086**
-InfluxDB Details
-**Database : umeemetricsdb**
-**User : grafana**
-**Password : your-influxdb-garafana-user-passw**
-Seve datasource settings 
+Add data source InfluxDB with settings:
 
-Import dashboard json file from this repo and save your monitoring dashboard
 
-## Installation on a node
+| Param         | Value         | 
+| ------------- |:-------------:|
+| HTTP      |               |
+| URL           | http://localhost:8086 |
+| InfluxDB Details |                       |
+| Database | umeemetricsdb |
+| User     | grafana       |
 
-### By fast installation script
+Save datasource settings 
+
+Import [json file](https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_umee-grafana-dashboard.json) from this repo and save your dashboard.
+
+### Installation on a node
+
+#### By fast installation script
 
 You can use fast installation script
 IMPORTANT: You sholud to run the script under the user where it is installed umee node.
@@ -84,10 +102,10 @@ wget https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_install.sh
 chmod +x mon_install.sh
 ./mon_install.sh
 ```
-It will install telegraf agent, clone project repo and extract your node data as MONIKER, VALOPER ADDR, RPC PORT
+It will install telegraf agent, clone project repo and extract your node data as MONIKER, VALOPER ADDR, RPC PORT.
 You should answer some question about your monitoring service from part **Monitoring server installation**
 
-### Manual installation
+#### Manual installation
 
 Install telegraf
 ```
@@ -177,7 +195,48 @@ Copy to config and paste your server name (for this it is convenient to use the 
 
 ## Dashboard interface 
 
-Dashboard have main cosmos-based node information and common system metrics. Most panel have description
+Dashboard have main cosmos-based node information and common system metrics. Most panel have description.
 
 ![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
 
+### Mon health
+Complex parameter. Can show problem with receiving metrics from node. Normal value is "OK"
+
+### Sync status
+Node catching_up parameter
+
+### Block height
+Latest blockheight of node 
+
+### Time since latest block
+Time interval in seconds between taking the metric and node latest block time. Value greater 15s may indicate some kind of synchronization problem.
+
+### Peers
+Number of connected peers 
+
+### Jailed status
+Validator jailed status. 
+
+### Missed blocks
+Number of missed blocks in 100 blocks running window. If the validator misses more than 50 blocks, it will end up in jail.
+
+### Bonded status
+Validator stake bonded info
+
+### Voting power
+Validator voting power. If the value of this parameter is zero, your node isn't in the active pool of validators 
+
+### Delegated tokens
+Number of delegated tokens
+
+### Version
+Version of umeed binary
+
+### Vali Rank
+Your node stake rank 
+
+### Active validator numbers
+Total number of active validators
+
+### Other common system metrics: CPU/RAM/FS load, etc.
+No comments needed)
