@@ -238,3 +238,4 @@ mon_umee_path="${repo}/monitor.sh"
 updateTelegrafConfig /etc/telegraf
 echo -e "UMEE monitoring tools was successfully install/upgrade. You could check telegraf logs: \"sudo journalctl -u telegraf -f\""
 echo -e "Project github: https://github.com/shurinov/mon_umee.git"
+echo -e "Visit your Grafana dashboard: $(echo ${mon_serv_url} | grep -oP '(?<=)(http://\d+.\d+.\d+.\d+:)(?=\d+)')3000"

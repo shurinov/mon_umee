@@ -1,11 +1,9 @@
 # Umee node monitoring tool
 
-Used toolset:
-* [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/)
-* [InfluxDB](https://www.influxdata.com/products/influxdb/)
-* [Grafana](https://grafana.com/)
+This project is developed for the UEEE community. The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring).
+The default architecture requires, in addition to the server, a node with a [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) agent, an additional monitoring server for [InfluxDB](https://www.influxdata.com/products/influxdb/) database and [Grafana](https://grafana.com/) web interface.
 
-The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring) 
+You should run your [UMEE node](https://docs.umee.cc/umee/) before you install monitoring suite. There is fast monitoring installation script in this repo.
 
 ## Monitoring server installation 
 
@@ -32,7 +30,8 @@ influx
 > create database umeemetricsdb
 > create user metrics with password 'password'
 > grant WRITE on umeemetricsdb to metrics
-
+> create user grafana with password 'other_password'
+> grant READ on umeemetricsdb to grafana
 ```
 
 You shold prepare for node agent installation:
@@ -61,9 +60,16 @@ Follow to **YOUR_MONITORING_SERVER_IP:3000** for setup grafana dashboard
 
 Change default password for grafana user admin/admin to more safe
 
-Load dashboard json file from this repo
+Add data source InfluxDB with settings
+HTTP
+**URL : http://localhost:8086**
+InfluxDB Details
+**Database : umeemetricsdb**
+**User : grafana**
+**Password : your-influxdb-garafana-user-passw**
+Seve datasource settings 
 
-![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
+Import dashboard json file from this repo and save your monitoring dashboard
 
 ## Installation on a node
 
@@ -72,7 +78,7 @@ Load dashboard json file from this repo
 You can use fast installation script
 IMPORTANT: You sholud to run the script under the user where it is installed umee node.
 
-Don't use **sudo** if UMEE-user is not **root** 
+Don't use **sudo** if UMEE-user is not a **root** 
 ```
 wget https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_install.sh
 chmod +x mon_install.sh
@@ -107,7 +113,7 @@ sudo -- bash -c 'echo "telegraf ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers'
 ```
 You can check telegram service status:
 ```
-systemctl status telegraf
+sudo systemctl status telegraf
 ```
 Clone this project repo and copy variable script template
 ```
@@ -170,4 +176,10 @@ Copy to config and paste your server name (for this it is convenient to use the 
   data_format = "influx"
   data_type = "integer""
 ```
+
+## Dashboard interface 
+
+Dashboard have main cosmos-based node information and common system metrics. Most panel have description
+
+![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
 
