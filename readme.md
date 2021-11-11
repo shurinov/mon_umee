@@ -1,9 +1,9 @@
 # Umee node monitoring tool
 
-This project is developed for the UEEE community. The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring).
+This project is developed for the UMEE community. The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring).
 The default architecture requires, in addition to the server, a node with a [Telegraf](https://www.influxdata.com/time-series-platform/telegraf/) agent, an additional monitoring server for [InfluxDB](https://www.influxdata.com/products/influxdb/) database and [Grafana](https://grafana.com/) web interface.
 
-You should run your [UMEE node](https://docs.umee.cc/umee/) before you install monitoring suite. There is fast monitoring installation script in this repo.
+You should configure your [UMEE node](https://docs.umee.cc/umee/) before you start installation monitoring suite. There is fast monitoring installation script in this repo.
 
 ## Monitoring server installation 
 
@@ -160,8 +160,6 @@ Copy to config and paste your server name (for this it is convenient to use the 
 [[inputs.system]]
 [[inputs.swap]]
 [[inputs.netstat]]
-[[inputs.processes]]
-[[inputs.kernel]]
 [[inputs.diskio]]
 # Output Plugin InfluxDB
 [[outputs.influxdb]]
