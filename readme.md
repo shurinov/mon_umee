@@ -2,17 +2,17 @@
 
 This project is developed for the UMEE community. The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring).
 
-To monitor you node you should have installed and configured:
+To monitor you node your should have installed and configured:
 On node server:
 * [UMEE node](https://docs.umee.cc/umee/) which should be configured (correct moniker, validator key, network ports setup)
 * [Telegraf agent](https://www.influxdata.com/time-series-platform/telegraf/)
-* **mon_umee** scripts set
+* [mon_umee](https://github.com/shurinov/mon_umee) scripts set
 
 On monitoring server:
 * [InfluxDB](https://www.influxdata.com/products/influxdb/)
 * [Grafana](https://grafana.com/)
 
-It is possible to install the software on the node server instance. But it is better to move it to standalone instance with opened web access to watch it from browser at any location.
+It is possible to install the software on the node server instance. Hovewer, it is better to move it to standalone instance with opened web access to watch it from browser at any location.
 
 ## The following steps will guide you through the setup process:
 
@@ -35,7 +35,7 @@ sudo systemctl start influxdb
 sudo systemctl status influxdb
 ```
 
-Setup database (replacing the passwords in the example with your own more secure ones):
+Setup database (change the passwords given in the example on more secure ones):
 ```
 influx
 > create database umeemetricsdb
@@ -45,7 +45,7 @@ influx
 > grant READ on umeemetricsdb to grafana
 ```
 
-You should keep database user and password to use later for agent configuration, please write it.
+Keep database user and password in order to use it later for agent configuration. Write it. 
 
 In the case of using standalone instance for monitoring staff,  you should know your node external ip address (you can know it by command ```curl ifconfig.me```).
 In the case of installation on the same instance, just use **localhost** or **127.0.0.1**
@@ -69,21 +69,21 @@ sudo systemctl status grafana-server
 ```
 Configuration:
 
-Follow to **YOUR_MONITORING_SERVER_IP:3000** for setup grafana dashboard.
+Follow  **YOUR_MONITORING_SERVER_IP:3000** to setup grafana dashboard.
 The following steps are performed in the graphical interface of grafana.
 
-Change default password for grafana user admin/admin to more safe
+Change default password for grafana user admin/admin on safer one
 
-Add data source InfluxDB with settings:
+Add data source InfluxDB with the following settings:
 
 
-| Param         | Value         | 
-| ------------- |:-------------:|
-| HTTP      |               |
-| URL           | http://localhost:8086 |
+| Param            | Value                 | 
+| ---------------- |:---------------------:|
+| HTTP             |                       |
+| URL              | http://localhost:8086 |
 | InfluxDB Details |                       |
-| Database | umeemetricsdb |
-| User     | grafana       |
+| Database         | umeemetricsdb         |
+| User             | grafana               |
 
 Save datasource settings 
 
@@ -103,7 +103,7 @@ chmod +x mon_install.sh
 ./mon_install.sh
 ```
 It will install telegraf agent, clone project repo and extract your node data as MONIKER, VALOPER ADDR, RPC PORT.
-You should answer some question about your monitoring service from part **Monitoring server installation**
+You should answer some questions about your monitoring service from part **Monitoring server installation**
 
 #### Manual installation
 
@@ -157,7 +157,7 @@ Edit telegraf configuration
 sudo mv /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.conf.orig
 sudo nano /etc/telegraf/telegraf.conf
 ```
-Copy to config and paste your server name (for this it is convenient to use the node moniker ):
+Copy it to config and paste your server name (to do so it is convenient to use the node moniker):
 ```
 # Global Agent Configuration
 [agent]
@@ -195,12 +195,12 @@ Copy to config and paste your server name (for this it is convenient to use the 
 
 ## Dashboard interface 
 
-Dashboard have main cosmos-based node information and common system metrics. Most panel have description.
+Dashboard has main cosmos-based node information and common system metrics. There is a description in it.
 
 ![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
 
 ### Mon health
-Complex parameter. Can show problem with receiving metrics from node. Normal value is "OK"
+Complex parameter can show problem concerning receiving metrics from node. Normal value is "OK"
 
 ### Sync status
 Node catching_up parameter
