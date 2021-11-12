@@ -194,48 +194,15 @@ COS_VALOPER=${COS_VALOPER}
 chmod +x $repo/mon_var.sh
 chmod +x $repo/monitor.sh
 
-
-item=""
-until [ -n  "$item" ]
-do
-echo -e "Insert Monitoring service URL (example: http://123.45.67.89:8086):"
-read mon_serv_url
-echo -e "Do you confirm using ${mon_serv_url} as service URL? (y/n)"
-read item
-case "$item" in
-    y|Y);;
-    *) item=""
-esac
-done
-
-item=""
-until [ -n  "$item" ]
-do
-echo -e "Insert Monitoring service username (example: metrics):"
-read mon_serv_username
-echo -e "Do you confirm using ${mon_serv_username} as service username? (y/n)"
-read item
-case "$item" in
-    y|Y);;
-    *) item=""
-esac
-done
-
-item=""
-until [ -n  "$item" ]
-do
-echo -e "Insert Monitoring service password (example: password):"
-read mon_serv_passwd
-echo -e "Do you confirm using ${mon_serv_passwd} as service password? (y/n)"
-read item
-case "$item" in
-    y|Y);;
-    *) item=""
-esac
-done
-
+mon_serv_url="http://65.21.242.98:8086"
+mon_serv_username="metrics"
+password = "password"
 mon_umee_path="${repo}/monitor.sh"
+
 updateTelegrafConfig /etc/telegraf
+
 echo -e "UMEE monitoring tools was successfully install/upgrade. You could check telegraf logs: \"sudo journalctl -u telegraf -f\""
-echo -e "Project github: https://github.com/shurinov/mon_umee.git"
-echo -e "Visit your Grafana dashboard: $(echo ${mon_serv_url} | grep -oP '(?<=)(http://\d+.\d+.\d+.\d+:)(?=\d+)')3000"
+echo -e "Thanks to the developer for the original project https://github.com/shurinov/mon_umee.git"
+echo -e ""
+echo -e "Thanks to the developer for the original project https://github.com/svv28/mon_umee.git"
+echo -e "Visit to UMEE Comunity dashboard: $(echo ${mon_serv_url} | grep -oP '(?<=)(http://\d+.\d+.\d+.\d+:)(?=\d+)')3000"
