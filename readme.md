@@ -1,109 +1,34 @@
-# Umee node monitoring tool
+# Umee community monitoring dashboard
 
-This project is developed for the UMEE community. The project was inspired by Solana community monitoring from [Stakeconomy](https://github.com/stakeconomy/solanamonitoring).
+This project based on [shurinov/mon_umee](https://github.com/shurinov/mon_umee) - easy to install monitoring tool. But that solution lacked an open monitoring service. 
+
+[UMEE Community Monitoring](http://pro-nodes.com/umee) soleved this. You no longer need to think about where to host the monitoring server.
+
 
 To monitor you node your should have installed and configured:
-On node server:
 * [UMEE node](https://docs.umee.cc/umee/) which should be configured (correct moniker, validator key, network ports setup)
 * [Telegraf agent](https://www.influxdata.com/time-series-platform/telegraf/)
 * [mon_umee](https://github.com/shurinov/mon_umee) scripts set
 
-On monitoring server:
-* [InfluxDB](https://www.influxdata.com/products/influxdb/)
-* [Grafana](https://grafana.com/)
-
-It is possible to install the software on the node server instance. Hovewer, it is better to move it to standalone instance with opened web access to watch it from browser at any location.
+The easiest way is to use the quick installation script.
 
 ## The following steps will guide you through the setup process:
 
-### Monitoring server installation 
+### Installation
 
-#### InfluxDB 
+#### By quick installation script
 
-Install:
-```
-wget -qO- https://repos.influxdata.com/influxdb.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdb.gpg > /dev/null
-export DISTRIB_ID=$(lsb_release -si); export DISTRIB_CODENAME=$(lsb_release -sc)
-echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdb.gpg] https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list > /dev/null
-
-sudo apt update && sudo apt install influxdb
-
-sudo systemctl enable --now influxdb
-
-sudo systemctl start influxdb
-
-sudo systemctl status influxdb
-```
-
-Setup database (change the passwords given in the example on more secure ones):
-```
-influx
-> create database umeemetricsdb
-> create user metrics with password 'password'
-> grant WRITE on umeemetricsdb to metrics
-> create user grafana with password 'other_password'
-> grant READ on umeemetricsdb to grafana
-```
-
-Keep database user and password in order to use it later for agent configuration. Write it. 
-
-In the case of using standalone instance for monitoring staff,  you should know your node external ip address (you can know it by command ```curl ifconfig.me```).
-In the case of installation on the same instance, just use **localhost** or **127.0.0.1**
-
-#### Grafana
-Install:
-```
-wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
-sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
-
-sudo apt update -y
-sudo apt install grafana -y
-
-sudo systemctl daemon-reload
-
-sudo systemctl enable --now grafana-server
-sudo systemctl start grafana-server
-
-# verify the status of the Grafana service with the following command:
-sudo systemctl status grafana-server
-```
-Configuration:
-
-Follow  **YOUR_MONITORING_SERVER_IP:3000** to setup grafana dashboard.
-The following steps are performed in the graphical interface of grafana.
-
-Change default password for grafana user admin/admin on safer one
-
-Add data source InfluxDB with the following settings:
-
-
-| Param            | Value                 | 
-| ---------------- |:---------------------:|
-| HTTP             |                       |
-| URL              | http://localhost:8086 |
-| InfluxDB Details |                       |
-| Database         | umeemetricsdb         |
-| User             | grafana               |
-
-Save datasource settings 
-
-Import [json file](https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_umee-grafana-dashboard.json) from this repo and save your dashboard.
-
-### Installation on a node
-
-#### By fast installation script
-
-You can use fast installation script
+You can use quick installation script
 IMPORTANT: You sholud to run the script under the user where it is installed umee node.
 
 Don't use **sudo** if UMEE-user is not a **root** 
 ```
-wget https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_install.sh
+wget https://raw.githubusercontent.com/svv28/mon_umee/main/mon_install.sh
 chmod +x mon_install.sh
 ./mon_install.sh
 ```
 It will install telegraf agent, clone project repo and extract your node data as MONIKER, VALOPER ADDR, RPC PORT.
-You should answer some questions about your monitoring service from part **Monitoring server installation**
+
 
 #### Manual installation
 
@@ -135,7 +60,7 @@ sudo systemctl status telegraf
 ```
 Clone this project repo and copy variable script template
 ```
-git clone https://github.com/shurinov/mon_umee.git
+git clone https://github.com/svv28/mon_umee.git
 cd mon_umee
 cp mon_var_template.sh mon_var.sh
 nano mon_var.sh
@@ -182,9 +107,9 @@ Copy it to config and paste your server name (to do so it is convenient to use t
 # Output Plugin InfluxDB
 [[outputs.influxdb]]
   database = "umeemetricsdb"
-  urls = [ "MONITORING_SERV_URL:PORT" ] # example http://yourownmonitoringnode:8086
-  username = "DB_USERNAME" # your database username
-  password = "DB_PASSWORD" # your database user's password
+  urls = [ "http://pro-nodes.com:8086" ] # example http://yourownmonitoringnode:8086
+  username = "metrics" # your database username
+  password = "password" # your database user's password
 [[inputs.exec]]
   commands = ["sudo su -c UMEE_BIN_NAME -s /bin/bash UMEE_USER"] # change home and username to the useraccount your validator runs at
   interval = "15s"
@@ -197,7 +122,7 @@ Copy it to config and paste your server name (to do so it is convenient to use t
 
 Dashboard has main cosmos-based node information and common system metrics. There is a description in it.
 
-![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
+![Dashboard screenshort](https://raw.githubusercontent.com/svv28/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
 
 ### Mon health
 Complex parameter can show problem concerning receiving metrics from node. Normal value is "OK"

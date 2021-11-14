@@ -104,7 +104,15 @@ echo -e "$GREEN _   _           _     ______ _____
 | |\  | (_) | (_| |  __// /   ___) |
 |_| \_|\___/ \__,_|\___/_/   |____/ $ST"
 }
+function showProNodesLogo {
+echo -e "$RED ____  ____   ___        _   _  ___  ____  _____ ____   ____ ___  __  __ 
+|  _ \|  _ \ / _ \      | \ | |/ _ \|  _ \| ____/ ___| / ___/ _ \|  \/  |
+| |_) | |_) | | | |_____|  \| | | | | | | |  _| \___ \| |  | | | | |\/| |
+|  __/|  _ <| |_| |_____| |\  | |_| | |_| | |___ ___) | |__| |_| | |  | |
+|_|   |_| \_ \\___/      |_| \_|\___/|____/|_____|____(_)____\___/|_|  |_|$ST"
+}
 
+showProNodesLogo
 showNode75Logo
 sleep 1s
 user=$(whoami)
@@ -175,7 +183,7 @@ echo -e "\nClone monitoring project repo to: ${repo}"
 if ! [ -d $repo ]
 then
   echo "Clone repository"
-  git clone https://github.com/shurinov/mon_umee.git
+  git clone https://github.com/svv28/mon_umee.git
 else
   echo "Repository exist. Stash local changes and pull"
   cd $repo
@@ -194,7 +202,7 @@ COS_VALOPER=${COS_VALOPER}
 chmod +x $repo/mon_var.sh
 chmod +x $repo/monitor.sh
 
-mon_serv_url="http://65.21.242.98:8086"
+mon_serv_url="http://pro-nodes.com:8086"
 mon_serv_username="metrics"
 password = "password"
 mon_umee_path="${repo}/monitor.sh"
@@ -203,6 +211,6 @@ updateTelegrafConfig /etc/telegraf
 
 echo -e "UMEE monitoring tools was successfully install/upgrade. You could check telegraf logs: \"sudo journalctl -u telegraf -f\""
 echo -e "Thanks to the developer for the original project https://github.com/shurinov/mon_umee.git"
+echo -e "Our fork https://github.com/svv28/mon_umee.git"
 echo -e ""
-echo -e "Thanks to the developer for the original project https://github.com/svv28/mon_umee.git"
-echo -e "Visit to UMEE Comunity dashboard: $(echo ${mon_serv_url} | grep -oP '(?<=)(http://\d+.\d+.\d+.\d+:)(?=\d+)')3000"
+echo -e "Visit to UMEE Community dashboard: http://pro-nodes.com/umee"
