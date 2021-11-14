@@ -1,6 +1,6 @@
 # Umee community monitoring dashboard
 
-This project based on [shurinov/mon_umee](https://github.com/shurinov/mon_umee) - easy to install monitoring tool. But that solution lacked an open monitoring service. 
+This project based on [shurinov/mon_umee](https://github.com/shurinov/mon_umee) - easy to install monitoring tool. But that solution dosen't have an open monitoring service. 
 
 [UMEE Community Monitoring](http://pro-nodes.com/umee) soleved this. You no longer need to think about where to host the monitoring server.
 
