@@ -8,7 +8,7 @@ function updateTelegrafConfig {
 # backup current config 
 sudo cp $1/telegraf.conf $1/$(date +"%F-%H:%M:%S")-telegraf.conf.orig
 sudo rm -rf $1/telegraf.conf
-sudo echo "# Global Agent Configuration
+echo "# Global Agent Configuration
 [agent]
   hostname = \"${moniker}\" # set this to a name you want to identify your node in the grafana dashboard
   flush_interval = \"15s\"
@@ -41,9 +41,11 @@ sudo echo "# Global Agent Configuration
   interval = \"15s\"
   timeout = \"5s\"
   data_format = \"influx\"
-  data_type = \"integer\""> $1/telegraf.conf #$HOME/telegraf.conf
+  data_type = \"integer\""> $HOME/telegraf.conf   
+#$1/telegraf.conf #$HOME/telegraf.conf
+sudo mv $HOME/telegraf.conf $1/telegraf.conf
 #restart service
-sudo systemctl restart telegraf
+sudo systemctl restart telegraf.service
 }
 
 function installTelegraf {
@@ -67,6 +69,7 @@ sudo apt -y install telegraf
 
 sudo systemctl enable --now telegraf
 sudo systemctl is-enabled telegraf
+
 # systemctl status telegraf
 
 # make the telegraf user sudo and adm to be able to execute scripts as umee user
@@ -74,6 +77,7 @@ sudo adduser telegraf sudo
 sudo adduser telegraf adm
 sudo -- bash -c 'echo "telegraf ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers'
 fi 
+sudo systemctl start telegraf
 }
 
 function seachRPC {
@@ -204,7 +208,7 @@ chmod +x $repo/monitor.sh
 
 mon_serv_url="http://pro-nodes.com:8086"
 mon_serv_username="metrics"
-password = "password"
+password="password"
 mon_umee_path="${repo}/monitor.sh"
 
 updateTelegrafConfig /etc/telegraf
