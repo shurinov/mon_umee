@@ -149,7 +149,7 @@ Insert your parameters to **mor_var.sh**:
 Save changes in mon_var.sh and enable execution permissions:
 
 ```
-chmod +x monitoring.sh mon_var.sh
+chmod +x monitor.sh mon_var.sh
 ```
 
 Edit telegraf configuration
