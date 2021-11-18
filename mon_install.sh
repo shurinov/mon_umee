@@ -8,7 +8,7 @@ function updateTelegrafConfig {
 # backup current config 
 sudo cp $1/telegraf.conf $1/$(date +"%F-%H:%M:%S")-telegraf.conf.orig
 sudo rm -rf $1/telegraf.conf
-sudo echo "# Global Agent Configuration
+echo "# Global Agent Configuration
 [agent]
   hostname = \"${moniker}\" # set this to a name you want to identify your node in the grafana dashboard
   flush_interval = \"15s\"
@@ -41,8 +41,8 @@ sudo echo "# Global Agent Configuration
   interval = \"15s\"
   timeout = \"5s\"
   data_format = \"influx\"
-  data_type = \"integer\""> $1/telegraf.conf #$HOME/telegraf.conf
-#restart service
+  data_type = \"integer\""> $HOME/telegraf.conf
+sudo mv $HOME/telegraf.conf $1/telegraf.conf
 sudo systemctl restart telegraf
 }
 
@@ -55,20 +55,16 @@ else
 echo "Begin to install telegraf"
 sudo apt update
 sudo apt -y install curl jq bc
-
 # install telegraf
 sudo cat <<EOF | sudo tee /etc/apt/sources.list.d/influxdata.list
 deb https://repos.influxdata.com/ubuntu bionic stable
 EOF
 sudo curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-
 sudo apt update
 sudo apt -y install telegraf
-
 sudo systemctl enable --now telegraf
 sudo systemctl is-enabled telegraf
 # systemctl status telegraf
-
 # make the telegraf user sudo and adm to be able to execute scripts as umee user
 sudo adduser telegraf sudo
 sudo adduser telegraf adm
