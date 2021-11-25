@@ -176,7 +176,7 @@ else
   echo "Repository exist. Stash local changes and pull"
   cd $repo
   git stash
-  git pull $repo
+  git pull
   cd $HOME
 fi
 
@@ -194,7 +194,7 @@ chmod +x $repo/monitor.sh
 item=""
 until [ -n  "$item" ]
 do
-echo -e "Insert Monitoring service URL (example: http://123.45.67.89:8086):"
+echo -ne "Insert Monitoring service URL (example: http://123.45.67.89:8086):"
 read mon_serv_url
 echo -ne "Do you confirm using ${mon_serv_url} as service URL? (y/n):"
 read item
@@ -207,7 +207,7 @@ done
 item=""
 until [ -n  "$item" ]
 do
-echo -e "Insert Monitoring service username (example: metrics):"
+echo -ne "Insert Monitoring service username (example: metrics):"
 read mon_serv_username
 echo -ne "Do you confirm using ${mon_serv_username} as service username? (y/n):"
 read item
@@ -220,7 +220,7 @@ done
 item=""
 until [ -n  "$item" ]
 do
-echo -e "Insert Monitoring service password (example: password):"
+echo -ne "Insert Monitoring service password (example: password):"
 read mon_serv_passwd
 echo -ne "Do you confirm using ${mon_serv_passwd} as service password? (y/n):"
 read item
