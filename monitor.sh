@@ -49,8 +49,11 @@ else
         logentry=$logentry" ver=\"$version\",block_height=$block_height,catching_up=$catching_up,time_since_block=$time_since_block,latest_block_time=$latest_block_time,peers_num=$peers_num,voting_power=$voting_power"
         #
         # Get validator status
-        val_status=$(${COS_BIN_NAME} query staking validator ${COS_VALOPER} --output json --node "tcp://localhost:${COS_PORT_RPC}")
-
+        if [ -n "${COS_VALOPER}" ]
+        then
+            val_status=$(${COS_BIN_NAME} query staking validator ${COS_VALOPER} --output json --node "tcp://localhost:${COS_PORT_RPC}")
+        fi
+                
         if [ -n "$val_status" ]
         then
             jailed=$(jq -r '.jailed' <<<$val_status)

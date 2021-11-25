@@ -105,7 +105,7 @@ showNode75Logo
 sleep 1s
 user=$(whoami)
 echo -e "\nThis script will install UMEE monitoring tools on your server for user $GREEN${user}$ST"
-echo -e "Continue? (y/n)"
+echo -ne "Continue? (y/n):"
 until [ -n  "$item" ]
 do
 read item
@@ -115,7 +115,7 @@ case "$item" in
     n|N) echo "Exit"
         exit 0
         ;;
-    *) echo "Please type answer (y/n)"
+    *) echo -ne "Please type answer (y/n):"
         item=""
 esac
 done
@@ -196,7 +196,7 @@ until [ -n  "$item" ]
 do
 echo -e "Insert Monitoring service URL (example: http://123.45.67.89:8086):"
 read mon_serv_url
-echo -e "Do you confirm using ${mon_serv_url} as service URL? (y/n)"
+echo -ne "Do you confirm using ${mon_serv_url} as service URL? (y/n):"
 read item
 case "$item" in
     y|Y);;
@@ -209,7 +209,7 @@ until [ -n  "$item" ]
 do
 echo -e "Insert Monitoring service username (example: metrics):"
 read mon_serv_username
-echo -e "Do you confirm using ${mon_serv_username} as service username? (y/n)"
+echo -ne "Do you confirm using ${mon_serv_username} as service username? (y/n):"
 read item
 case "$item" in
     y|Y);;
@@ -222,7 +222,7 @@ until [ -n  "$item" ]
 do
 echo -e "Insert Monitoring service password (example: password):"
 read mon_serv_passwd
-echo -e "Do you confirm using ${mon_serv_passwd} as service password? (y/n)"
+echo -ne "Do you confirm using ${mon_serv_passwd} as service password? (y/n):"
 read item
 case "$item" in
     y|Y);;
