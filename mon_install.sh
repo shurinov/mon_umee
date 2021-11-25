@@ -57,21 +57,17 @@ else
 echo "Begin to install telegraf"
 sudo apt update
 sudo apt -y install curl jq bc
-
 # install telegraf
 sudo cat <<EOF | sudo tee /etc/apt/sources.list.d/influxdata.list
 deb https://repos.influxdata.com/ubuntu bionic stable
 EOF
 sudo curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-
 sudo apt update
 sudo apt -y install telegraf
-
 sudo systemctl enable --now telegraf
 sudo systemctl is-enabled telegraf
 
 # systemctl status telegraf
-
 # make the telegraf user sudo and adm to be able to execute scripts as umee user
 sudo adduser telegraf sudo
 sudo adduser telegraf adm

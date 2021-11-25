@@ -58,6 +58,8 @@ You can check telegram service status:
 ```
 sudo systemctl status telegraf
 ```
+Status can be not ok with default Telegraf's config. Next steps will fix it.
+
 Clone this project repo and copy variable script template
 ```
 git clone https://github.com/svv28/mon_umee.git
