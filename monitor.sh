@@ -47,13 +47,18 @@ else
         peers_num=$(curl -s localhost:${COS_PORT_RPC}/net_info | jq -r '.result.peers[].node_info | [.id, .moniker] | @csv' | wc -l)
         # Prepare metiric to out
         logentry=$logentry" ver=\"$version\",block_height=$block_height,catching_up=$catching_up,time_since_block=$time_since_block,latest_block_time=$latest_block_time,peers_num=$peers_num,voting_power=$voting_power"
-        #
-        # Get validator status
+        # Common validator statistic
+        list_limit=3000
+        # Numbers of active validators
+        val_active_numb=$(${COS_BIN_NAME} q staking validators -o json --limit=${list_limit} --node "tcp://localhost:${COS_PORT_RPC}" | 
+        jq '.validators[] | select(.status=="BOND_STATUS_BONDED")' | jq -r ' .description.moniker' | wc -l)
+        logentry="$logentry,val_active_numb=$val_active_numb"
+
+        # Get our validator status
         if [ -n "${COS_VALOPER}" ]
         then
             val_status=$(${COS_BIN_NAME} query staking validator ${COS_VALOPER} --output json --node "tcp://localhost:${COS_PORT_RPC}")
         fi
-                
         if [ -n "$val_status" ]
         then
             jailed=$(jq -r '.jailed' <<<$val_status)
@@ -64,16 +69,12 @@ else
             # Missing blocks number in window (in UMEE slashing window size 100 blocks)
             bl_missed=$(jq -r '.missed_blocks_counter' <<<$($COS_BIN_NAME q slashing signing-info $($COS_BIN_NAME tendermint show-validator) -o json))
             # Get validator statistic
-            list_limit=3000
-            # Numbers of active validators
-            val_active_numb=$(${COS_BIN_NAME} q staking validators -o json --limit=${list_limit} --node "tcp://localhost:${COS_PORT_RPC}" | 
-            jq '.validators[] | select(.status=="BOND_STATUS_BONDED")' | jq -r ' .description.moniker' | wc -l)
-            # Our stake value rank 
+            # Our stake value rank (if not in list assign -1 value)
             val_rank=$(${COS_BIN_NAME} q staking validators -o json --limit=${list_limit} --node "tcp://localhost:${COS_PORT_RPC}" | \
             jq '.validators[] | select(.status=="BOND_STATUS_BONDED")' | jq -r ' .operator_address'  | sort -gr | nl |\
             grep  "${COS_VALOPER}" | awk '{print $1}')
-            logentry="$logentry,jailed=$jailed,delegated=$delegated,bonded=$bonded,bl_missed=$bl_missed,val_active_numb=$val_active_numb"
-            if [ -n "$val_rank" ]; then logentry="$logentry,val_rank=$val_rank"; fi
+            if [ -z "$val_rank" ]; then val_rank=-1; fi
+            logentry="$logentry,jailed=$jailed,delegated=$delegated,bonded=$bonded,bl_missed=$bl_missed,val_rank=$val_rank"
         else 
             health=3 # validator status problem
         fi
