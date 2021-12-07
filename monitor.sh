@@ -71,7 +71,7 @@ else
             # Get validator statistic
             # Our stake value rank (if not in list assign -1 value)
             val_rank=$(${COS_BIN_NAME} q staking validators -o json --limit=${list_limit} --node "tcp://localhost:${COS_PORT_RPC}" | \
-            jq '.validators[] | select(.status=="BOND_STATUS_BONDED")' | jq -r ' .operator_address'  | sort -gr | nl |\
+            jq '.validators[] | select(.status=="BOND_STATUS_BONDED")' | jq -r '.tokens + " - " + .operator_address'  | sort -gr | nl |\
             grep  "${COS_VALOPER}" | awk '{print $1}')
             if [ -z "$val_rank" ]; then val_rank=-1; fi
             logentry="$logentry,jailed=$jailed,delegated=$delegated,bonded=$bonded,bl_missed=$bl_missed,val_rank=$val_rank"
