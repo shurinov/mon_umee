@@ -67,7 +67,7 @@ else
             # Get bonded status            
             if [ $(jq -r '.status' <<<$val_status) == "BOND_STATUS_BONDED" ]; then bonded=true; else bonded=false; fi
             # Missing blocks number in window (in UMEE slashing window size 100 blocks)
-            bl_missed=$(jq -r '.missed_blocks_counter' <<<$($COS_BIN_NAME q slashing signing-info $($COS_BIN_NAME tendermint show-validator) -o json))
+            bl_missed=$(jq -r '.missed_blocks_counter' <<<$($COS_BIN_NAME q slashing signing-info $($COS_BIN_NAME tendermint show-validator) -o json --node "tcp://localhost:${COS_PORT_RPC}"))
             # Get validator statistic
             # Our stake value rank (if not in list assign -1 value)
             val_rank=$(${COS_BIN_NAME} q staking validators -o json --limit=${list_limit} --node "tcp://localhost:${COS_PORT_RPC}" | \
