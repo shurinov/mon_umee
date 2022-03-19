@@ -143,11 +143,15 @@ cp mon_var_template.sh mon_var.sh
 nano mon_var.sh
 ```
 
-Insert your parameters to **mor_var.sh**:
+Insert your parameters to **mon_var.sh**:
 * full path to umeed binary to COS_BIN_NAME ( check ```which umeed```)
 * node PRC port to COS_PORT_RPC ( check in file ```path_to_umee_node_config/config/config.toml```)
+* node API port to COS_PORT_API ( check in file ```path_to_umee_node_config/config/app.toml```)
 * node validator address to COS_VALOPER ( like ```umeevaloper********```)
-
+* validator wallet address to COS_WALADDR
+* peggo bridge Umee wallet address to COS_BR_ADDR
+* peggo bridge Etherium wallet address to ETH_BR_ADDR
+* way to Etherium node RPC to ETH_NODE_RPC ( like ```http://localhost:8545``` )
 Save changes in mon_var.sh and enable execution permissions:
 
 ```
