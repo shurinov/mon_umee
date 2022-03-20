@@ -91,20 +91,6 @@ Import [json file](https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_
 
 ### Installation on a node
 
-#### By fast installation script
-
-You can use fast installation script
-IMPORTANT: You sholud to run the script under the user where it is installed umee node.
-
-Don't use **sudo** if UMEE-user is not a **root** 
-```
-wget https://raw.githubusercontent.com/shurinov/mon_umee/main/mon_install.sh
-chmod +x mon_install.sh
-./mon_install.sh
-```
-It will install telegraf agent, clone project repo and extract your node data as MONIKER, VALOPER ADDR, RPC PORT.
-You should answer some questions about your monitoring service from part **Monitoring server installation**
-
 #### Manual installation
 
 Install telegraf
@@ -165,7 +151,6 @@ sudo nano /etc/telegraf/telegraf.conf
 ```
 Copy it to config and paste your server name (to do so it is convenient to use the node moniker):
 ```
-# Global Agent Configuration
 [agent]
   hostname = "YOUR_MONIKER/SERVER_NAME" # set this to a name you want to identify your node in the grafana dashboard
   flush_interval = "15s"
@@ -181,9 +166,14 @@ Copy it to config and paste your server name (to do so it is convenient to use t
 [[inputs.io]]
 [[inputs.mem]]
 [[inputs.net]]
+[[inputs.nstat]]
 [[inputs.system]]
 [[inputs.swap]]
 [[inputs.netstat]]
+[[inputs.linux_sysctl_fs]]
+[[inputs.processes]]
+[[inputs.interrupts]]
+[[inputs.kernel]]
 [[inputs.diskio]]
 # Output Plugin InfluxDB
 [[outputs.influxdb]]
@@ -191,19 +181,31 @@ Copy it to config and paste your server name (to do so it is convenient to use t
   urls = [ "MONITORING_SERV_URL:PORT" ] # example http://yourownmonitoringnode:8086
   username = "DB_USERNAME" # your database username
   password = "DB_PASSWORD" # your database user's password
+	
 [[inputs.exec]]
-  commands = ["sudo su -c UMEE_BIN_NAME -s /bin/bash UMEE_USER"] # change home and username to the useraccount your validator runs at
+  commands = ["sudo su -c /PATH/TO/UMEE_MON/monitor.sh -s /bin/bash <UMEE_USER>"] # change home and username to the useraccount your validator runs at
   interval = "15s"
   timeout = "5s"
   data_format = "influx"
-  data_type = "integer""
+  data_type = "integer"
+[[inputs.exec]]
+  commands = ["sudo su -c /PATH/TO/UMEE_MON/monitor_bal.sh -s /bin/bash <UMEE_USER>"] 
+  interval = "15s"
+  timeout = "5s"
+  data_format = "influx"
+  data_type = "integer"
 ```
+
+#### By fast installation script
+
+Temporarily unavailable. Script will be updated to actual version soon...
 
 ## Dashboard interface 
 
 Dashboard has main cosmos-based node information and common system metrics. There is a description in it.
 
-![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_grafana_dashboard.png "Dashboard screenshort")
+![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/01_mon_umee_v2_grafana_dashboard.png "Dashboard screenshort1")
+![Dashboard screenshort](https://raw.githubusercontent.com/shurinov/mon_umee/main/resource/02_mon_umee_v2_grafana_dashboard.png "Dashboard screenshort2")
 
 ### Mon health
 Complex parameter can show problem concerning receiving metrics from node. Normal value is "OK"
